@@ -99,6 +99,11 @@ print_access_entries() {
   printf '  - wparse TCP 入口:localhost:19002\n'
 }
 
+
+chmod_token_entries() {
+  chmod 600 "$SCRIPT_DIR/wparse/.warp_parse/admin_api.token"
+}
+
 main() {
   find_compose_file
   resolve_compose_cmd
