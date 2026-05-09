@@ -1,6 +1,6 @@
 services:
   warp-toolchain:
-    image: ghcr.io/wp-labs/warp-parse:0.21.7-alpha
+    image: ghcr.io/wp-labs/warp-parse:0.23.8-alpha
     container_name: warp-toolchain
     entrypoint: ["/bin/sh", "-c"]
     command:
