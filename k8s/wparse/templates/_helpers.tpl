@@ -51,3 +51,23 @@ app.kubernetes.io/instance: {{ .Release.Name }}
 {{- define "wparse.warpParseSecretName" -}}
 {{- default (printf "%s-warp-parse" (include "wparse.fullname" .)) .Values.wparse.warpParseSecret.existingSecret }}
 {{- end }}
+
+{{/* Whether the chart bundles an admin token file. */}}
+{{- define "wparse.hasBundledWarpParseToken" -}}
+{{- if .Files.Get ".warp_parse/admin_api.token" }}true{{- end }}
+{{- end }}
+
+{{/* Whether the chart bundles a complete TLS keypair. */}}
+{{- define "wparse.hasBundledWarpParseTls" -}}
+{{- $crt := .Files.Get ".warp_parse/tls/server.crt" -}}
+{{- $key := .Files.Get ".warp_parse/tls/server.key" -}}
+{{- if or (and $crt (not $key)) (and $key (not $crt)) }}
+{{- fail "both .warp_parse/tls/server.crt and .warp_parse/tls/server.key must be provided together" }}
+{{- end }}
+{{- if and $crt $key }}true{{- end }}
+{{- end }}
+
+{{/* Whether a WarpParse secret should be mounted. */}}
+{{- define "wparse.hasWarpParseSecret" -}}
+{{- if or .Values.wparse.warpParseSecret.existingSecret (include "wparse.hasBundledWarpParseToken" .) }}true{{- end }}
+{{- end }}

@@ -32,6 +32,7 @@ Cargo.lock
 # Python cache (docs scripts)
 __pycache__/
 *.pyc
+.tls
 
 # Node (in case tools are installed locally)
 node_modules/

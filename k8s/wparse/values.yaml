@@ -27,11 +27,11 @@ wparse:
     - deamon
     - --work-root
     - /app/config
-  env:
-    - name: GIT_REPO
-      value: http://localhost:3000/gitea/project_root.git
-    - name: MONITOR_ENDPOINT
-      value: http://localhost:8428
+  # env:
+  #   - name: GIT_REPO
+  #     value: http://wp-station-gitea:3000
+  #   - name: VICTORIA_METRICS_ENDPOINT
+  #     value: http://wp-monitor-victoria-metrics:8428
   envFrom: []
   timezone:
     enabled: true
@@ -44,12 +44,6 @@ wparse:
     runAsGroup: 0
   warpParseSecret:
     existingSecret: ""
-    create: true
-    tokenPath: .warp_parse/admin_api.token
-    tls:
-      enabled: false
-      crtPath: .warp_parse/tls/server.crt
-      keyPath: .warp_parse/tls/server.key
   service:
     type: ClusterIP
     primaryPort: 19002

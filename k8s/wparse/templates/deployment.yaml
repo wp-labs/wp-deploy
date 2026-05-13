@@ -13,10 +13,10 @@ spec:
       {{- include "wparse.selectorLabels" . | nindent 6 }}
   template:
     metadata:
-      {{- if or (and .Values.wparse.warpParseSecret.create (not .Values.wparse.warpParseSecret.existingSecret)) .Values.wparse.podAnnotations }}
+      {{- if or (include "wparse.hasWarpParseSecret" .) .Values.wparse.podAnnotations }}
       annotations:
         checksum/config: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
-        {{- if and .Values.wparse.warpParseSecret.create (not .Values.wparse.warpParseSecret.existingSecret) }}
+        {{- if and (not .Values.wparse.warpParseSecret.existingSecret) (include "wparse.hasBundledWarpParseToken" .) }}
         checksum/warp-parse-secret: {{ include (print $.Template.BasePath "/secret.yaml") . | sha256sum }}
         {{- end }}
         {{- with .Values.wparse.podAnnotations }}
@@ -106,9 +106,11 @@ spec:
           volumeMounts:
             - name: config
               mountPath: {{ .Values.wparse.workDir }}
+            {{- if include "wparse.hasWarpParseSecret" . }}
             - name: warp-parse-secret
               mountPath: {{ .Values.wparse.warpParseSecretPath }}
               readOnly: true
+            {{- end }}
             {{- with .Values.wparse.volumeMounts }}
             {{- toYaml . | nindent 12 }}
             {{- end }}
@@ -123,6 +125,7 @@ spec:
               {{- end }}
         - name: config
           emptyDir: {}
+        {{- if include "wparse.hasWarpParseSecret" . }}
         - name: warp-parse-secret
           secret:
             secretName: {{ include "wparse.warpParseSecretName" . }}
@@ -130,12 +133,13 @@ spec:
             items:
               - key: admin_api.token
                 path: admin_api.token
-              {{- if .Values.wparse.warpParseSecret.tls.enabled }}
+              {{- if include "wparse.hasBundledWarpParseTls" . }}
               - key: tls.crt
                 path: tls/server.crt
               - key: tls.key
                 path: tls/server.key
               {{- end }}
+        {{- end }}
       {{- with .Values.wparse.volumes }}
       {{- toYaml . | nindent 8 }}
       {{- end }}

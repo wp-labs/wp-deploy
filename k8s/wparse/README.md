@@ -115,14 +115,12 @@ wparse:
 
 WarpParse 的 admin token 不放入 ConfigMap，而是通过 Kubernetes Secret 挂载。
 
-默认情况下，Chart 会从 chart 内置文件读取 admin token 并创建 Secret：
+默认情况下，如果 chart 内存在 `admin_api.token`，Chart 会自动创建 Secret：
 
 ```yaml
 wparse:
   warpParseSecret:
     existingSecret: ""
-    create: true
-    tokenPath: .warp_parse/admin_api.token
 ```
 
 请把 token 内容写入：
@@ -160,8 +158,7 @@ kubectl create secret generic wparse-admin \
 
 ```bash
 helm upgrade --install limbic-host ./k8s/wparse \
-  --set warpParseSecret.create=false \
-  --set warpParseSecret.existingSecret=wparse-admin
+  --set wparse.warpParseSecret.existingSecret=wparse-admin
 ```
 
 已有 Secret 至少需要包含这个 key：
@@ -181,25 +178,14 @@ cert_file = "/root/.warp_parse/tls/server.crt"
 key_file = "/root/.warp_parse/tls/server.key"
 ```
 
-Chart 默认从专用目录读取 TLS 文件：
+Chart 会自动检查专用目录中的 TLS 文件；当 `server.crt` 和 `server.key` 同时存在时，会把它们一并写入同一个 Secret：
 
 ```text
 k8s/wparse/.warp_parse/tls/server.crt
 k8s/wparse/.warp_parse/tls/server.key
 ```
 
-启用 TLS 时，设置：
-
-```yaml
-wparse:
-  warpParseSecret:
-    tls:
-      enabled: true
-      crtPath: .warp_parse/tls/server.crt
-      keyPath: .warp_parse/tls/server.key
-```
-
-这里的 `crtPath` 和 `keyPath` 必须是 chart 内路径，不能是本机任意绝对路径。
+如果只提供其中一个文件，模板会直接报错，避免渲染出不完整的 TLS Secret。
 
 使用已有 Secret 时，Secret 需要包含：
 
@@ -222,8 +208,7 @@ kubectl create secret generic wparse-admin \
 
 ```bash
 helm upgrade --install limbic-host ./k8s/wparse \
-  --set warpParseSecret.create=false \
-  --set warpParseSecret.existingSecret=wparse-admin
+  --set wparse.warpParseSecret.existingSecret=wparse-admin
 ```
 
 ## 运行态目录
@@ -322,3 +307,12 @@ kubectl exec -it <pod> -- ls -la /app/config/.run
 helm lint ./k8s/wparse
 helm template limbic-host ./k8s/wparse >/dev/null
 ```
+
+## Secret 创建规则
+
+- 设置了 `wparse.warpParseSecret.existingSecret`：直接挂载已有 Secret，不再读取 chart 内文件。
+- 未设置 `existingSecret` 且存在 `k8s/wparse/.warp_parse/admin_api.token`：自动创建 Secret，并写入 `admin_api.token`。
+- 同时存在 `k8s/wparse/.warp_parse/tls/server.crt` 和 `k8s/wparse/.warp_parse/tls/server.key`：在同一个 Secret 中额外写入 `tls.crt` 和 `tls.key`。
+- 仅存在其中一个 TLS 文件：`helm template` / `helm lint` 直接失败。
+
+注意：如果你删除了这些文件，也没有设置 `existingSecret`，那么还需要同步调整 `wparse-config/conf/wparse.toml` 中的 `admin_api.auth` 和 `admin_api.tls` 配置；否则 WarpParse 运行时仍会按配置去读取对应文件。

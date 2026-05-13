@@ -1,7 +1,8 @@
 [[connectors]]
-id = "victoriametrics_sink"
-type = "victoriametrics"
-allow_override = ["insert_url", "flush_interval_secs"]
+id = "victorialogs_sink"
+type = "victorialogs"
+allow_override = ["endpoint", "api_path", "flush_interval_secs", "create_time_field","batch_size","tags"]
 [connectors.params]
-insert_url = "http://localhost:8428/api/v1/import/prometheus"
-flush_interval_secs = 1
+endpoint = "http://127.0.0.1:9428"
+api_path = "/insert/jsonline"
+flush_interval_secs = 3

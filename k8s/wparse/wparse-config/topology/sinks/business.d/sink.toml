@@ -7,7 +7,7 @@ oml = ["*"]
 name = "victorialogs_output"
 connect = "victorialogs_sink"
 [sink_group.sinks.params]
-endpoint = "http://localhost:9428"
+endpoint = "http://wp-monitor-victoria-logs:9428"
 api_path = "/insert/jsonline?_msg_field=content,log"
 
 # [[sink_group.sinks]]
