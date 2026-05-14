@@ -25,6 +25,19 @@ chart_name_from_dir() {
   basename "$1"
 }
 
+normalize_image() {
+  local image="$1"
+  local last_segment="${image##*/}"
+
+  if [[ "$image" == *@sha256:* ]]; then
+    printf '%s\n' "$image"
+  elif [[ "$last_segment" == *:* ]]; then
+    printf '%s\n' "$image"
+  else
+    printf '%s:latest\n' "$image"
+  fi
+}
+
 list_images() {
   local chart_dir="$1"
   local release_name
@@ -36,12 +49,9 @@ list_images() {
 
   release_name="$(chart_name_from_dir "$chart_dir")"
 
-  helm template "$release_name" "$chart_dir" --include-tests \
-    | awk '
-        match($0, /^[[:space:]]*image:[[:space:]]*"?([^"[:space:]]+)/, matches) {
-          print matches[1]
-        }
-      ' \
+  helm template "$release_name" "$chart_dir" \
+    | sed -n 's/^[[:space:]]*image:[[:space:]]*"\{0,1\}\([^"[:space:]]\{1,\}\)"\{0,1\}[[:space:]]*$/\1/p' \
+    | while IFS= read -r image; do normalize_image "$image"; done \
     | sort -u
 }
 
