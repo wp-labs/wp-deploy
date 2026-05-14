@@ -40,7 +40,7 @@ jobs:
           for chart_dir in k8s/*; do
             [[ -f "${chart_dir}/Chart.yaml" ]] || continue
             for arch in amd64 arm64; do
-              ./scripts/helm-images.sh package "${chart_dir}" "${arch}" dist
+              bash ./scripts/helm-images.sh package "${chart_dir}" "${arch}" dist
             done
           done
           sha256sum dist/*.tar.gz > dist/SHA256SUMS.txt
