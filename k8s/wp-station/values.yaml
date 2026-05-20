@@ -14,11 +14,11 @@ station:
   image:
     repository: ghcr.io/wp-labs/wp-station
     pullPolicy: IfNotPresent
-    tag: "v0.1.11-alpha"
+    tag: "v0.1.12-alpha"
   toolchainImage:
     repository: ghcr.io/wp-labs/warp-parse
     pullPolicy: IfNotPresent
-    tag: "0.23.8-alpha"
+    tag: "exp-v0.23.6-12-alpha"
   initImage:
     repository: busybox
     pullPolicy: IfNotPresent
@@ -27,7 +27,7 @@ station:
     host: 0.0.0.0
     port: 8081
   log:
-    level: debug
+    level: info
   git:
     userName: WarpStation
     userEmail: station@warpparse.local

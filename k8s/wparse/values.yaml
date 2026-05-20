@@ -14,7 +14,7 @@ wparse:
   image:
     repository: ghcr.io/wp-labs/warp-parse
     pullPolicy: IfNotPresent
-    tag: "0.23.8-alpha"
+    tag: "exp-v0.23.6-12-alpha"
   initImage:
     repository: busybox
     pullPolicy: IfNotPresent
@@ -48,7 +48,7 @@ wparse:
   warpParseSecret:
     existingSecret: ""
   service:
-    type: ClusterIP
+    type: NodePort
     primaryPort: 19002
     ports:
       - name: tcp
@@ -56,11 +56,11 @@ wparse:
         containerPort: 19002
         targetPort: tcp
         protocol: TCP
-        nodePort: null
+        nodePort: 30092
   adminService:
-    type: ClusterIP
+    type: NodePort
     port: 19090
-    nodePort: null
+    nodePort: 30090
   ingress:
     enabled: false
     className: ""
@@ -92,7 +92,6 @@ wparse:
     minReplicas: 1
     maxReplicas: 100
     targetCPUUtilizationPercentage: 80
-    # targetMemoryUtilizationPercentage: 80
   volumes: []
   volumeMounts: []
   nodeSelector: {}
