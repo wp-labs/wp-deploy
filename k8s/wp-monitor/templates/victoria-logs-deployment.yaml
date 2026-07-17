@@ -23,6 +23,7 @@ spec:
           image: "{{ .Values.victoriaLogs.image.repository }}:{{ .Values.victoriaLogs.image.tag }}"
           imagePullPolicy: {{ .Values.victoriaLogs.image.pullPolicy }}
           args:
+            - -delete.enable=true
             - --envflag.enable
             - --envflag.prefix=VLOGS_
             - --http.shutdownDelay=15s

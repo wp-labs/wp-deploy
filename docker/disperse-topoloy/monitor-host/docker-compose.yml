@@ -42,6 +42,7 @@ services:
       - logs_data:/storage
     command:
       - --envflag.enable
+      - -delete.enable=true
       - --envflag.prefix=VLOGS_
       - --http.shutdownDelay=15s
       - --httpListenAddr=:9428
